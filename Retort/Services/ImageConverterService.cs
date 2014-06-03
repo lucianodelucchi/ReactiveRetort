@@ -65,15 +65,9 @@ namespace Convertidor.Services
         /// </summary>
         /// <param name="images"></param>
         /// <returns></returns>
-        public IObservable<OwnImage> ConvertImages(IEnumerable<OwnImage> images, CancellationToken ct)
-        {
-            return images.ToObservable().SelectMany(image => Observable.FromAsync(token => this.ConvertImageAsync(image, token)));
-        }
-
         public IObservable<OwnImage> ConvertImages(IObservable<OwnImage> images)
         {
             return images.SelectMany(image => Observable.FromAsync(token => ConvertImageAsync(image, token)));
-            //return images.SelectMany((image, ct) => ConvertImageAsync(image, ct));
         }
 
         /// <summary>
@@ -100,13 +94,6 @@ namespace Convertidor.Services
         private Task<OwnImage> ConvertImageAsync(OwnImage image, CancellationToken ct)
         {
             return Task.Run(() => this.ConvertImage(image), ct);
-        }
-
-        private IObservable<OwnImage> ConvertImageObservable(OwnImage image)
-        {
-            return Observable.Create<OwnImage>(
-                o => Observable.ToAsync<OwnImage, OwnImage>(ConvertImage)(image).Subscribe(o)
-            );
         }
 
         /// <summary>
