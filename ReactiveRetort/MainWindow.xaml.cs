@@ -1,34 +1,21 @@
-﻿using ReactiveUI;
-using Retort.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Retort.ViewModels;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Reactive.Linq;
-using ReactiveUI.Xaml;
+using Convertidor.Services;
 
 namespace Retort
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : IViewFor<MainWindowViewModel>
+    public partial class MainWindow : Window
     {
         public MainWindow()
         {
-            ViewModel = new MainWindowViewModel();
-
             InitializeComponent();
+            var converterService = new ImageConverterService();
+            DataContext = new MainWindowViewModel(converterService); 
+
+           
 
             this.BindCommand(ViewModel, x => x.Compress);
             this.BindCommand(ViewModel, x => x.CancelConversion);
@@ -58,18 +45,5 @@ namespace Retort
         }
         #endregion
 
-        public MainWindowViewModel ViewModel
-        {
-            get { return (MainWindowViewModel)GetValue(ViewModelProperty); }
-            set { SetValue(ViewModelProperty, value); }
-        }
-        public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register("ViewModel", typeof(MainWindowViewModel), typeof(MainWindow), new PropertyMetadata(null));
-
-        object IViewFor.ViewModel
-        {
-            get { return ViewModel; }
-            set { ViewModel = (MainWindowViewModel)value; }
-        }
     }
 }

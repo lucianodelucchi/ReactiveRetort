@@ -1,7 +1,12 @@
 ﻿<controls:MetroWindow x:Class="Retort.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:local="clr-namespace:Retort"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance local:}"              
         Title="Retort" Height="432" Width="525" FontFamily="Segoe UI" ResizeMode="CanResizeWithGrip" BorderBrush="#FFA6CAF0" BorderThickness="1" Icon="Resources/appbar.futurama.bender.png">
     <DockPanel>
         <StackPanel DockPanel.Dock="Top" Margin="10">
