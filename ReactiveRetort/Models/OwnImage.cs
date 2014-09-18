@@ -3,7 +3,7 @@
 //      Copyright (c) 
 //  </copyright>
 // -----------------------------------------------------------------------------
-namespace Convertidor.Models
+namespace ReactiveRetort.Models
 {
     using System;
     using IO = System.IO;

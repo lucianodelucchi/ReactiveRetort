@@ -3,7 +3,7 @@
 //      Copyright (c) 
 //  </copyright>
 // -----------------------------------------------------------------------------
-namespace Convertidor.Services
+namespace ReactiveRetort.Services
 {
     using System;
     using System.Collections.Generic;
@@ -13,7 +13,7 @@ namespace Convertidor.Services
     using System.Threading;
     using System.Threading.Tasks;
 
-    using Convertidor.Models;
+    using ReactiveRetort.Models;
     using System.Reactive.Linq;
 
     /// <summary>

@@ -1,29 +1,20 @@
-﻿using Retort.ViewModels;
+﻿using ReactiveRetort.ViewModels;
 using System.Windows;
-using Convertidor.Services;
+using ReactiveRetort.Services;
+using MahApps.Metro.Controls;
 
-namespace Retort
+namespace ReactiveRetort
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         public MainWindow()
         {
             InitializeComponent();
             var converterService = new ImageConverterService();
             DataContext = new MainWindowViewModel(converterService); 
-
-           
-
-            this.BindCommand(ViewModel, x => x.Compress);
-            this.BindCommand(ViewModel, x => x.CancelConversion);
-
-            this.OneWayBind(ViewModel, x => x.Images, x => x.Images.ItemsSource);
-            this.OneWayBind(ViewModel, x => x.ImagesCount, x => x.ImageCount.Text);
-
-            this.OneWayBind(ViewModel, x => x.IsBusy, x => x.ProgressGroup.Visibility, () => false);
         }
 
         #region Code not following Rx
@@ -41,7 +32,7 @@ namespace Retort
 
         private void Droparea_Drop(object sender, DragEventArgs e)
         {
-            this.ViewModel.DraggedFolders.AddRange((string[])e.Data.GetData(DataFormats.FileDrop, false));
+            ((MainWindowViewModel)this.DataContext).DraggedFolders.AddRange((string[])e.Data.GetData(DataFormats.FileDrop, false));
         }
         #endregion
 

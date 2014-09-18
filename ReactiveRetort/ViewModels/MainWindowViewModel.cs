@@ -1,4 +1,4 @@
-﻿using Convertidor.Models;
+﻿using ReactiveRetort.Models;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 using System.Reactive.Linq;
 using System.IO;
 using System.Diagnostics;
-using Convertidor.Services;
+using ReactiveRetort.Services;
 using System.Threading;
 using System.Reactive;
 
-namespace Retort.ViewModels
+namespace ReactiveRetort.ViewModels
 {
     public class MainWindowViewModel : ReactiveObject
     {
@@ -35,40 +35,52 @@ namespace Retort.ViewModels
 
             imagesCount = Images.CountChanged.ToProperty(this, x => x.ImagesCount);
 
+            var canExecuteCompress = this.WhenAnyValue(x => x.ImagesCount)
+                .Select(x => x > 0);
+
             //commands
-            Compress = this.WhenAnyValue(x => x.ImagesCount, x => x > 0).ToCommand();
+            Compress = ReactiveCommand.CreateAsyncObservable(
+                canExecuteCompress,
+                _ => {
+                    var ret = ConvertImages().TakeUntil(CancelConversion);
+                    return ret; 
+                });
 
             isBusy = Compress.IsExecuting.ToProperty(this, x => x.IsBusy);
 
-            var execution = Compress.RegisterAsync(x => ConvertImages(x).TakeUntil(CancelConversion));
-            execution.Subscribe(x => Images.Remove(x));
+            Compress.ObserveOn(RxApp.MainThreadScheduler).Subscribe(x => Images.Remove(x));
 
             Compress.ThrownExceptions
                 .Select(ex => new UserError(ex.Message, ex.Source))
                 .Subscribe(ex => Debug.WriteLine(ex.ErrorMessage));
 
-            CancelConversion = this.WhenAnyValue(x => x.ImagesCount, x => x.IsBusy, (count, busy) => count > 0 && busy).ToCommand();
+            var canExecuteCancelConversion = this.WhenAnyValue(x => x.ImagesCount, x => x.IsBusy, (count, busy) => count > 0 && busy)
+                .Select(x => x);
+
+            CancelConversion = ReactiveCommand.CreateAsyncObservable(canExecuteCancelConversion, _ => { return Observable.Return<Unit>(Unit.Default); });
             CancelConversion.ThrownExceptions
                 .Select(ex => new UserError(ex.Message, ex.Source))
                 .Subscribe(ex => Debug.WriteLine(ex.ErrorMessage));
+
+            CancelConversion.Subscribe(_ => Debug.WriteLine("executed"));
         }
 
         ImageConverterService converterService;
 
-        public ReactiveCommand Compress { get; protected set; }
-        public ReactiveCommand CancelConversion { get; protected set; }
+        public ReactiveCommand<OwnImage> Compress { get; private set; }
+        public ReactiveCommand<Unit> CancelConversion { get; private set; }
 
         public readonly ReactiveList<string> DraggedFolders = new ReactiveList<string>();
 
         public ReactiveList<OwnImage> Images { get; protected set; }
 
-        ObservableAsPropertyHelper<int> imagesCount;
+        private readonly ObservableAsPropertyHelper<int> imagesCount;
         public int ImagesCount
         {
             get { return imagesCount.Value; }
         }
 
-        ObservableAsPropertyHelper<bool> isBusy;
+        private readonly ObservableAsPropertyHelper<bool> isBusy;
         public bool IsBusy
         {
             get { return isBusy.Value; }
@@ -82,10 +94,9 @@ namespace Retort.ViewModels
                                 .ToList();
         }
 
-        private IObservable<OwnImage> ConvertImages(object o)
+        private IObservable<OwnImage> ConvertImages()
         {
             return this.converterService.ConvertImages(Images.ToObservable());
         }
-
     }
 }
