@@ -41,10 +41,8 @@ namespace ReactiveRetort.ViewModels
             //commands
             Compress = ReactiveCommand.CreateAsyncObservable(
                 canExecuteCompress,
-                _ => {
-                    var ret = ConvertImages().TakeUntil(CancelConversion);
-                    return ret; 
-                });
+                _ => ConvertImages().TakeUntil(CancelConversion) 
+                );
 
             isBusy = Compress.IsExecuting.ToProperty(this, x => x.IsBusy);
 
@@ -61,8 +59,6 @@ namespace ReactiveRetort.ViewModels
             CancelConversion.ThrownExceptions
                 .Select(ex => new UserError(ex.Message, ex.Source))
                 .Subscribe(ex => Debug.WriteLine(ex.ErrorMessage));
-
-            CancelConversion.Subscribe(_ => Debug.WriteLine("executed"));
         }
 
         ImageConverterService converterService;
